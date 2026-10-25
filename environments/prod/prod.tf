@@ -37,3 +37,17 @@ output "prod_vm_private_ip" {
   value       = module.compute.vm_private_ip
   description = "Private IP of the production virtual machine"
 }
+
+module "storage" {
+  source                   = "../../modules/azure_storage"
+  resource_group_name      = azurerm_resource_group.prod.name
+  location                 = azurerm_resource_group.prod.location
+  environment              = "prod"
+  account_tier             = "Standard"
+  account_replication_type = "ZRS" # Production-grade high availability
+}
+
+output "prod_storage_account_name" {
+  value       = module.storage.storage_account_name
+  description = "Production storage account name"
+}
