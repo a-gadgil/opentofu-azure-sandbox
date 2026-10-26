@@ -44,7 +44,16 @@ module "storage" {
   account_replication_type = "LRS"
 }
 
+
+# Add your declarative import block right here in the same file
+import {
+  id = "/subscriptions/828c19cf-1794-450c-a9e0-51b158f737d7/resourceGroups/sample-resource/providers/Microsoft.Storage/storageAccounts/saopentofu"
+  to = azurerm_storage_account.imported_manual
+}
+
+
 output "dev_storage_account_name" {
   value       = module.storage.storage_account_name
   description = "Dev storage account name"
 }
+
