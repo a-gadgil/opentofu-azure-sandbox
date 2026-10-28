@@ -116,3 +116,12 @@ resource "azurerm_network_security_group" "nsg" {
     }
   }
 }
+
+locals {
+  # Safely attempt to read a custom subnet prefix from an optional variable, 
+  # falling back to a default standard range if it's undefined or null.
+  dev_subnet_prefix = coalesce(
+    try(var.custom_network_config.subnet_prefix, null), 
+    "10.0.1.0/24"
+  )
+}
