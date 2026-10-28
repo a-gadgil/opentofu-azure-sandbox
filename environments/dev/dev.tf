@@ -57,3 +57,62 @@ output "dev_storage_account_name" {
   description = "Dev storage account name"
 }
 
+variable "inbound_rules" {
+  type = map(object({
+    priority                   = number
+    direction                  = string
+    access                     = string
+    protocol                   = string
+    source_port_range          = string
+    destination_port_range     = string
+    source_address_prefix      = string
+    destination_address_prefix = string
+  }))
+  default = {
+    "Allow_HTTP" = {
+      priority                   = 100
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "80"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    }
+    "Allow_HTTPS" = {
+      priority                   = 101
+      direction                  = "Inbound"
+      access                     = "Allow"
+      protocol                   = "Tcp"
+      source_port_range          = "*"
+      destination_port_range     = "443"
+      source_address_prefix      = "*"
+      destination_address_prefix = "*"
+    }
+  }
+}
+
+resource "azurerm_network_security_group" "nsg" {
+  name                = "nsg-dev-01"
+  location            = "eastus"
+  resource_group_name = "rg-dev"
+
+  dynamic "security_rule" {
+    # Directly iterate over the map. 
+    # security_rule.key will be "Allow_HTTP", etc.
+    # security_rule.value will be the object containing priority, protocol, etc.
+    for_each = var.inbound_rules
+    
+    content {
+      name                       = security_rule.key
+      priority                   = security_rule.value.priority
+      direction                  = security_rule.value.direction
+      access                     = security_rule.value.access
+      protocol                   = security_rule.value.protocol
+      source_port_range          = security_rule.value.source_port_range
+      destination_port_range     = security_rule.value.destination_port_range
+      source_address_prefix      = security_rule.value.source_address_prefix
+      destination_address_prefix = security_rule.value.destination_address_prefix
+    }
+  }
+}
